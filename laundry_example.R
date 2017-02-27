@@ -1,4 +1,4 @@
-maxpalcen_data <- read.csv("data/maxpalcen.csv")
+maxpalcen_data <- read.csv("../data/maxpalcen.csv")
 colnames(maxpalcen_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show the distribution of idle times from 0 mins to 2 hrs, in bins of width = 30 seconds
