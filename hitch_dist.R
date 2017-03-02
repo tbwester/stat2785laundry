@@ -12,8 +12,8 @@ sec<-as.numeric(sec)
 totaltime <- as.numeric(difftime(snell_data$end_time, snell_data$start_time), units="mins") + snell_data$extend_time
 
 a=matrix(c(1, 2, 3, 4), ncol = 4, byrow = TRUE)
-b=matrix(c(5, 7,
-           6, 8), ncol=2, byrow = TRUE)
+b=matrix(c(5, 6,
+           7, 8), ncol=2, byrow = TRUE)
 
 reverse <- function(num, m, isRow){
   if(isRow==TRUE){
@@ -50,8 +50,17 @@ dist_2ma <- function(num1, num2, md, mw){
 ##1 and 7 are closest to the door
 dist_door_ma <- function(num1, md, mw){
   if(num1<=4){
-    return(dist_2ma(num1, 1, md, mw)+3)
+    return(dist_2ma(num1, 1, md, mw)+2)
   }else{
-    return(dist_2ma(num1, 7, md, mw)+3)
+    return(dist_2ma(num1, 7, md, mw)+6)
+  }
+}
+
+##1 and 7 are closest to the paystation
+dist_pay_ma <- function(num1, md, mw){
+  if(num1<=4){
+    return(dist_2ma(num1, 1, md, mw))
+  }else{
+    return(dist_2ma(num1, 7, md, mw)+4)
   }
 }

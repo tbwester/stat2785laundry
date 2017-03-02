@@ -67,3 +67,14 @@ dist_door_ma <- function(num1, m1, m2, m3){
   }
 }
 
+##9, 11, 2  are closest to the paystation
+dist_pay_ma <- function(num1, m1, m2, m3){
+  if(num1>=3&&num1<=9){
+    return(dist_2ma(num1, 9, m1, m2, m3)+1)
+  }else if(num1>=10){
+    return(dist_2ma(num1, 11, m1, m2, m3))
+  }else{
+    return(dist_2ma(num1, 2, m1, m2, m3)+6)
+  }
+}
+
