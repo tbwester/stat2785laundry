@@ -47,8 +47,8 @@ def coincidence(fname):
                 break # this is ok since ordered
 
             ## Don't check for coincidence with runs > 2hrs before this one
-            if astime(data[j][0]) + dt.timedelta(hours=2) < astime(data[i][0]):
-                continue
+            #if astime(data[j][0]) + dt.timedelta(hours=2) < astime(data[i][0]):
+            #    continue
 
             ## Don't check for coincidence from the same machine
             if data[j][4] == data[i][4]:
