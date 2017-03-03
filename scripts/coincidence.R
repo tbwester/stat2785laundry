@@ -1,3 +1,5 @@
+## deprecated -- use coincidence.py instead
+
 data <- as.data.frame(read.csv("../data/hithal.csv"))
 names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
