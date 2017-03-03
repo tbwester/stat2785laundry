@@ -25,7 +25,7 @@ list_inuse = c()
 for (i in i_list) {
   n_available = 0
   coin_list = ""
-  print(i)
+
   for (j in j_list) {
     ## Don't check for coincidence for times after
     if (data$start_time[j] >= data$start_time[i]) {
