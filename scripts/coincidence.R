@@ -31,6 +31,10 @@ for (i in i_list) {
     if (data$start_time[j] >= data$start_time[i]) {
       break # this is ok since ordered
     }
+    ## Don't check for coincidence with runs > 2hrs before this one
+    if (data$start_time[j] + 120 * 60 < data$start_time[i]) {
+        next
+    }
     ## Don't check for coincidence from the same machine
     if (data$number[i] == data$number[j]) {
       next
@@ -51,7 +55,7 @@ for (i in i_list) {
       }
     }
   }
-  n_inuse <- append(n_open, n_available)
+  n_inuse <- append(n_inuse, n_available)
   list_inuse <- c(list_inuse, coin_list)
 }
 
