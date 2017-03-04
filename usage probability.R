@@ -21,7 +21,7 @@ ma_no[length(ma_no)+1]=0
 mo[length(mo)+1]=0
 date[length(date)+1]=0
 
-day=data.frame(cbind(mo, date))
+dates=as.numeric(difftime(maxpalcen_data$end_time[length(data[,1])], maxpalcen_data$start_time[1], units="days"))
 
 daysum=as.numeric(day$mo)+as.numeric(day$date)
 
@@ -29,19 +29,42 @@ usage_ma=matrix(c(rep(0, max(ma_no)*78)), ncol=78, byrow = TRUE)
 
 j=1#ma num 1
 k=1#day 1
-
-for(i in 1:length(totaltime)){
-  if (ma_no[i]==ma_no[i+1]){
-    if(daysum[i]==daysum[i+1]){
-      usage_ma[j][k]=usage_ma[j][k]+totaltime_hr[i]
-    }else{
-      usage_ma[j][k]=usage_ma[j][k]+totaltime_hr[i]
+temp=0
+#for(i in 1:length(totaltime)){
+ ##  if(daysum[i]==daysum[i+1]){
+   #   temp=temp+totaltime_hr[i]
+    #}else{
+     # usage_ma[j][k]=temp+totaltime_hr[i]
+      #print(usage_ma[j][k])
+      #k=k+1
+      #temp=0
+    #}
+  #}else{
+  #  usage_ma[j][k]=temp+totaltime_hr[i]
+  # j=j+1
+   # k=1
+  #  temp=0
+#  }
+#}
+k=1
+temp=0
+for(i in 1:length(max(ma_no))){
+  while(ma_no[k]==ma_no[k+1]){
+    for(j in 1:78){
+      while(daysum[k]==daysum[k+1]){
+        temp=temp+totaltime_hr[k]
+        k=k+1
+      }
+      usage_ma[i][j]=temp+totaltime_hr[k]
+      print(temp+totaltime_hr[k])
       k=k+1
+      temp=0
     }
-  }else{
-    usage_ma[j][k]=usage_ma[j][k]+totaltime_hr[i]
-    j=j+1
-    k=1
+    usage_ma[i][j]=temp+totaltime_hr[k]
+    print(temp+totaltime_hr[k])
+    k=k+1
+    temp=0
   }
 }
+
 
