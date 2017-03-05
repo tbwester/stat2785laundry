@@ -76,11 +76,9 @@ data_train <- data[samp,]
 data_test <- data[-samp,]
 
 ytrain <- c() # Response: Next machine that gets used
-x1train <- c() # Predictor 1: Number of machines in use
-x2train <- c() # Predictor 2: % in-use of cluster
-x3train <- c() # Predictor 3: 0/1 closest to door
-x4train <- c() # Predictor 4: time difference (mins) between Y
-x5train <- c() # Predictor 5: 0/1 washer/dryer
+x1train <- c() # Predictor 1: % in-use of cluster
+x2train <- c() # Predictor 2: 0/1 washer/dryer
+x3train <- c() # Predictor 3: Time of day 0=morning, 1=afternoon, 2=night
 for (i in 1:length(data_train[,1])) {
     nexty <- -1
     counter <- data_train$index[i] + 1 #index of next machine to start
@@ -101,18 +99,29 @@ for (i in 1:length(data_train[,1])) {
     
     if (data_train$type[i] == "w") {
         x1train <- append(x1train, data_train$inuse_count[i]/n_wash)
-        x2train <- append(x2train, in_matrix(data_train$inuse_list[i], a)/length(a))
     }
     else {
         x1train <- append(x1train, data_train$inuse_count[i]/n_dry)
-        x2train <- append(x2train, in_matrix(data_train$inuse_list[i], b)/length(b))
     }
     
+    td <- 0
     dt <- timeofday(data_train$start_time[i])
-    x4train <- append(x4train, dt)
-    x5train <- append(x5train, as.numeric(data_train$type[i] == "d"))
+    if (dt > 6 && dt < 12) {
+        td <- 0
+    }
+    else if (dt > 12 && dt < 18) {
+        td <- 1
+    }
+    else if (dt > 18 && dt < 24) {
+        td <- 2
+    }
+    else {
+        td <- 3
+    }
+    x3train <- append(x3train, td)
+    x2train <- append(x2train, as.numeric(data_train$type[i] == "d"))
 }
 
-treemodel <- rpart(ytrain ~ x1train + x2train + x4train + x5train, method="anova",control=rpart.control(minsplit=50, cp=0.001))
+treemodel <- rpart(ytrain ~ x1train + x2train + x3train, method="class",control=rpart.control(minsplit=50, cp=0.001))
 plot(treemodel)
 text(treemodel)
