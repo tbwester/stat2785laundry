@@ -125,3 +125,66 @@ for (i in 1:length(data_train[,1])) {
 treemodel <- rpart(ytrain ~ x1train + x2train + x3train, method="class",control=rpart.control(minsplit=50, cp=0.001))
 plot(treemodel)
 text(treemodel)
+
+results <- predict(treemodel, type="class")
+head(results)
+head(ytrain)
+
+ytest <- c() # Response: Next machine that gets used
+x1test <- c() # Predictor 1: % in-use of cluster
+x2test <- c() # Predictor 2: 0/1 washer/dryer
+x3test <- c() # Predictor 3: Time of day 0=morning, 1=afternoon, 2=night
+for (i in 1:length(data_test[,1])) {
+    nexty <- -1
+    counter <- data_test$index[i] + 1 #index of next machine to start
+    invalid <- FALSE
+    while (nexty == -1) {
+        entry <- data[which(data$index==counter),]
+        if (dim(entry)[1] == 0) {
+            invalid <- TRUE
+            break
+        }
+        if (entry$type != data_test$type[i]) {
+            counter = counter + 1
+            next
+        }
+        if (is.element(entry$number, a) && !is.element(data_test$number[i], a) ) {
+            counter = counter + 1
+            next
+        }
+        nexty = entry$index
+    }
+    if (invalid) {
+        next
+    }
+    ytest <- append(ytest, data[which(data$index==nexty),"number"])
+    
+    
+    if (data_test$type[i] == "w") {
+        x1test <- append(x1test, data_test$inuse_count[i]/n_wash)
+    }
+    else {
+        x1test <- append(x1test, data_test$inuse_count[i]/n_dry)
+    }
+    
+    td <- 0
+    dt <- timeofday(data_test$start_time[i])
+    if (dt > 6 && dt < 12) {
+        td <- 0
+    }
+    else if (dt > 12 && dt < 18) {
+        td <- 1
+    }
+    else if (dt > 18 && dt < 24) {
+        td <- 2
+    }
+    else {
+        td <- 3
+    }
+    x3test <- append(x3test, td)
+    x2test <- append(x2test, as.numeric(data_test$type[i] == "d"))
+}
+
+newdata <- data.frame(ytrain=ytest, x1train=x1test, x2train=x2test, x3train=x3test)
+
+harambe <- predict(treemodel, newdata=newdata, type="class")
