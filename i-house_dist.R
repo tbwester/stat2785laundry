@@ -1,7 +1,7 @@
-a=matrix(c(13, 15, 17, 21, 23, 25, 0, 0, 0, 0,
+c=matrix(c(13, 15, 17, 21, 23, 25, 0, 0, 0, 0,
            14, 16, 18, 20, 22, 24, 26, 1, 2, 3, 4), ncol = 11, byrow = TRUE)
 b=matrix(c( 5, 6, 7), ncol=3, byrow = TRUE)
-c=matrix(c( 8, 9, 10, 11, 12), ncol=5, byrow = TRUE)
+a=matrix(c( 8, 9, 10, 11, 12), ncol=5, byrow = TRUE)
 
 reverse <- function(num, m, isRow){
   if(isRow==TRUE){
@@ -58,14 +58,24 @@ dist_2ma <- function(num1, num2, m1, m2, m3){
     
     
 
-##14, 7, 11  are closest to the door
+##12, 7, 16  are closest to the door
 dist_door_ma <- function(num1, m1, m2, m3){
   if(num1<=4||num1>=13){
-    return(dist_2ma(num1, 12, m1, m2, m3)+4)
+    return(same_matrix(num1, 12, m1)+4)
   }else if(num1>=5&&num1<=7){
-    return(dist_2ma(num1, 7, m1, m2, m3)+10)
+    return(same_matrix(num1, 7, m2)+10)
   }else{
-    return(dist_2ma(num1, 11, m1, m2, m3)+5)
+    return(same_matrix(num1, 16, m3)+5)
   }
 }
 
+##12, 7, 18  are closest to the pay
+dist_door_pay <- function(num1, m1, m2, m3){
+  if(num1<=4||num1>=13){
+    return(same_matrix(num1, 12, m1)+3)
+  }else if(num1>=5&&num1<=7){
+    return(same_matrix(num1, 7, m2)+9)
+  }else{
+    return(same_matrix(num1, 18, m3)+5)
+  }
+}

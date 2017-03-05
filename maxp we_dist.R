@@ -59,11 +59,11 @@ dist_2ma <- function(num1, num2, m1, m2, m3){
 ##1, 9, 11  are closest to the door
 dist_door_ma <- function(num1, m1, m2, m3){
   if(num1<=6){
-    return(dist_2ma(num1, 1, m1, m2, m3))
+    return(same_matrix(num1, 1, m1))
   }else if(num1>=7&&num1<=9){
-    return(dist_2ma(num1, 9, m1, m2, m3)+1)
+    return(same_matrix(num1, 9, m2)+1)
   }else{
-    return(dist_2ma(num1, 11, m1, m2, m3)+6)
+    return(same_matrix(num1, 11, m3)+6)
   }
 }
 

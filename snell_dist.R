@@ -50,17 +50,17 @@ dist_2ma <- function(num1, num2, md, mw){
 ##2 and 7 are closest to the door
 dist_door_ma <- function(num1, md, mw){
   if(num1<=4){
-    return(dist_2ma(num1, 2, md, mw)+3)
+    return(same_matrix(num1, 2, md)+3)
   }else{
-    return(dist_2ma(num1, 7, md, mw)+3)
+    return(same_matrix(num1, 7, mw)+3)
   }
 }
 
 ##2 and 7 are closest to the paystation
 dist_pay_ma <- function(num1, md, mw){
   if(num1<=4){
-    return(dist_2ma(num1, 2, md, mw)+2)
+    return(same_matrix(num1, 2, md)+2)
   }else{
-    return(dist_2ma(num1, 7, md, mw)+2)
+    return(same_matrix(num1, 7, mw)+2)
   }
 }

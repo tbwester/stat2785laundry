@@ -26,7 +26,7 @@ reverse <- function(num, m, isRow){
 same_matrix <- function(num1, num2, m){
   nu1=data.frame(which(m==num1, arr.ind = TRUE))
   nu2=data.frame(which(m==num2, arr.ind = TRUE))
-  return(abs(nu1$row-nu2$row)+abs(nu1$col-nu$col))
+  return(abs(nu1$row-nu2$row)+abs(nu1$col-nu2$col))
 }
 
 dist_2ma <- function(num1, num2, md, mw){
@@ -43,6 +43,7 @@ dist_2ma <- function(num1, num2, md, mw){
     return((abs(nu1$row-(nu2$row+1))+1)+#row layout
              nu1$col+reverse(nu2$col, mw, "FALSE")+1)#col laytout
   }else{
+    print("rea")
     return(same_matrix(num1, num2, md))
   }
 }
@@ -50,17 +51,17 @@ dist_2ma <- function(num1, num2, md, mw){
 ##1 and 7 are closest to the door
 dist_door_ma <- function(num1, md, mw){
   if(num1<=4){
-    return(dist_2ma(num1, 1, md, mw)+2)
+    return(same_matrix(num1, 1, md)+2)
   }else{
-    return(dist_2ma(num1, 7, md, mw)+6)
+    return(same_matrix(num1, 7, mw)+6)
   }
 }
 
 ##1 and 7 are closest to the paystation
 dist_pay_ma <- function(num1, md, mw){
   if(num1<=4){
-    return(dist_2ma(num1, 1, md, mw))
+    return(same_matrix(num1, 1, md))
   }else{
-    return(dist_2ma(num1, 7, md, mw)+4)
+    return(same_matrix(num1, 7, mw)+4)
   }
 }

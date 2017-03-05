@@ -39,18 +39,18 @@ dist_2ma <- function(num1, num2, m1, m2){
 ##11, 18  are closest to the door
 dist_door_ma <- function(num1, m1, m2){
   if(num1<=16){
-    return(dist_2ma(num1, 11, m1, m2)+5)
+    return(same_matrix(num1, 11, m1)+5)
   }else{
-    return(dist_2ma(num1, 18, m1, m2)+1)
+    return(same_matrix(num1, 18, m2)+1)
   }
 }
 
 ##9, 18  are closest to the paystation
 dist_pay_ma <- function(num1, m1, m2){
   if(num1<=16){
-    return(dist_2ma(num1, 9, m1, m2)+5)
+    return(same_matrix(num1, 9, m1)+5)
   }else{
-    return(dist_2ma(num1, 18, m1, m2)+2)
+    return(same_matrix(num1, 18, m2)+2)
   }
 }
 

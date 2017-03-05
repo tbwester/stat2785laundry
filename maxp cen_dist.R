@@ -1,5 +1,5 @@
-a=matrix(c(3, 4, 5, 6, 7, 8, 9), ncol = 6, byrow = TRUE)
-b=matrix(c(10, 12, 14, 16, 18,
+a=matrix(c(3, 4, 5, 6, 7, 8, 9), ncol = 7, byrow = TRUE)
+ab=matrix(c(10, 12, 14, 16, 18,
            11, 13, 15, 17, 19), ncol=5, byrow = TRUE)
 c=matrix(c(1, 2), ncol=2, byrow=TRUE)
 
@@ -45,10 +45,12 @@ dist_2ma <- function(num1, num2, m1, m2, m3){
     nu1=data.frame(which(m3==num1, arr.ind = TRUE))
     return (reverse(nu1$col, m3, FALSE)+nu2$col)#col
   }else if((num1<=2)&&(num2>=10)){
+    print("Re1")
     nu2=data.frame(which(m2==num2, arr.ind = TRUE))
     nu1=data.frame(which(m3==num1, arr.ind = TRUE))
     return(reverse(nu2$row, m2, TRUE)-nu1$row+reverse(nu2$col, m2, FALSE)+nu1$col)
-  }else{
+  }else if ((num1<=2)&&(num2<=2)){
+    print("Re2")
     return(same_matrix(num1, num2, m3))
   }
 }
@@ -59,22 +61,22 @@ dist_2ma <- function(num1, num2, m1, m2, m3){
 ##9, 11, 1  are closest to the door
 dist_door_ma <- function(num1, m1, m2, m3){
   if(num1>=3&&num1<=9){
-    return(dist_2ma(num1, 9, m1, m2, m3))
+    return(same_matrix(num1, 9, m1))
   }else if(num1>=10){
-    return(dist_2ma(num1, 11, m1, m2, m3)+1)
+    return(same_matrix(num1, 11, m2)+1)
   }else{
-    return(dist_2ma(num1, 1, m1, m2, m3)+6)
+    return(same_matrix(num1, 1, m3)+6)
   }
 }
 
 ##9, 11, 2  are closest to the paystation
 dist_pay_ma <- function(num1, m1, m2, m3){
   if(num1>=3&&num1<=9){
-    return(dist_2ma(num1, 9, m1, m2, m3)+1)
+    return(same_matrix(num1, 9, m1)+1)
   }else if(num1>=10){
-    return(dist_2ma(num1, 11, m1, m2, m3))
+    return(same_matrix(num1, 11, m2))
   }else{
-    return(dist_2ma(num1, 2, m1, m2, m3)+6)
+    return(same_matrix(num1, 2, m3)+6)
   }
 }
 
