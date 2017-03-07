@@ -1,4 +1,6 @@
-stony_data <- read.csv("../data/570stoisl.csv")
+stony_data <- read.csv("data/570stoisl.csv")
+source("distances/stony_dist.R")
+source("distances/get_quantile_distances.R")
 colnames(stony_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -65,3 +67,21 @@ for(i in 1:length(totaltime)){
 
 colnames(usage_ma)=c(1:78)
 
+means_stony = apply(usage_ma, 1, mean)
+
+dist_stony_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_stony_pay = c(dist_stony_pay, dist_pay_ma(i, a, b))
+}
+stony_pay_q = get_quantile_lables(dist_stony_pay)
+
+dist_stony_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_stony_door = c(dist_stony_door, dist_door_ma(i, a, b))
+}
+stony_door_q = get_quantile_lables(dist_stony_door)
+
+stony_summary = data.frame(usage = means_stony, 
+                        pay_q = stony_pay_q,
+                        door_q = stony_door_q)
+write.csv(stony_summary, "aggregate_data/stony_summary.csv", row.names = FALSE)

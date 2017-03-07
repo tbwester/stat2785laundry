@@ -1,4 +1,6 @@
 snehal_data <- read.csv("../data/snehal.csv")
+source("distances/snell_dist.R")
+source("distances/get_quantile_distances.R")
 colnames(snehal_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -65,3 +67,23 @@ for(i in 1:length(totaltime)){
 
 colnames(usage_ma)=c(1:78)
 
+means_snell = apply(usage_ma, 1, mean)
+
+dist_snell_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  d = dist_pay_ma(i, a, b)
+  print(d)
+  dist_snell_pay = c(dist_snell_pay, d)
+}
+snell_pay_q = get_quantile_lables(dist_snell_pay)
+
+dist_snell_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_snell_door = c(dist_snell_door, dist_door_ma(i, a, b))
+}
+snell_door_q = get_quantile_lables(dist_snell_door)
+
+snell_summary = data.frame(usage = means_snell, 
+                        pay_q = snell_pay_q,
+                        door_q = snell_door_q)
+write.csv(snell_summary, "aggregate_data/snell_summary.csv", row.names = FALSE)

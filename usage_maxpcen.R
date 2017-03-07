@@ -1,4 +1,6 @@
-maxpalcen_data <- read.csv("../data/maxpalcen.csv")
+maxpalcen_data <- read.csv("data/maxpalcen.csv")
+source("distances/maxp_cen_dist.R")
+source("distances/get_quantile_distances.R")
 colnames(maxpalcen_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -62,3 +64,22 @@ for(i in 1:length(totaltime)){
 }
 
 colnames(usage_ma)=c(1:dates)
+
+means_maxpc = apply(usage_ma, 1, mean)
+
+dist_maxpc_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_maxpc_pay = c(dist_maxpc_pay, dist_pay_ma(i, a, ab, c))
+}
+maxpc_pay_q = get_quantile_lables(dist_maxpc_pay)
+
+dist_maxpc_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_maxpc_door = c(dist_maxpc_door, dist_door_ma(i, a, ab, c))
+}
+maxpc_door_q = get_quantile_lables(dist_maxpc_door)
+
+maxpc_summary = data.frame(usage = means_maxpc, 
+                        pay_q = maxpc_pay_q,
+                        door_q = maxpc_door_q)
+write.csv(maxpc_summary, "aggregate_data/maxpc_summary.csv", row.names = FALSE)

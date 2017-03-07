@@ -1,4 +1,7 @@
-burcou_data <- read.csv("../data/burcou.csv")
+#SET THE WORKING DIRECTORY TO HERE 
+burcou_data <- read.csv("data/burcou.csv")
+source("distances/bj_dist.R")
+source("distances/get_quantile_distances.R")
 colnames(burcou_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -65,3 +68,21 @@ for(i in 1:length(totaltime)){
 
 colnames(usage_ma)=c(1:78)
 
+means_bj = apply(usage_ma, 1, mean)
+
+dist_bj_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_bj_pay = c(dist_bj_pay, dist_pay_ma(i, a, b))
+}
+bj_pay_q = get_quantile_lables(dist_bj_pay)
+
+dist_bj_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_bj_door = c(dist_bj_door, dist_door_ma(i, a, b))
+}
+bj_door_q = get_quantile_lables(dist_bj_door)
+
+bj_summary = data.frame(usage = means_bj, 
+                        pay_q = bj_pay_q,
+                        door_q = bj_door_q)
+write.csv(bj_summary, "aggregate_data/bj_summary.csv", row.names = FALSE)

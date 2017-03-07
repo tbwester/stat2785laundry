@@ -1,4 +1,6 @@
-rengrarescom_data <- read.csv("../data/rengrarescom.csv")
+rengrarescom_data <- read.csv("data/rengrarescom.csv")
+source("distances/south_dist.R")
+source("distances/get_quantile_distances.R")
 colnames(rengrarescom_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -65,3 +67,24 @@ for(i in 1:length(totaltime)){
 
 colnames(usage_ma)=c(1:78)
 
+means_south = apply(usage_ma, 1, mean)
+
+dist_south_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_south_pay = c(dist_south_pay, dist_pay_ma(i, a, b, c, d, e, f, g, h))
+}
+south_pay_q = get_quantile_lables(dist_south_pay)
+
+dist_south_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_south_door = c(dist_south_door, dist_door_ma(i, a, b, c, d,
+                                                    e, f, g, h))
+}
+south_door_q = get_quantile_lables(dist_south_door)
+
+length(means_south)
+length(south_pay_q)
+south_summary = data.frame(usage = means_south, 
+                        pay_q = south_pay_q,
+                        door_q = south_door_q)
+write.csv(south_summary, "aggregate_data/south_summary.csv", row.names = FALSE)

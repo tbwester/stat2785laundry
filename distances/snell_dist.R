@@ -1,14 +1,3 @@
-snell_data <- read.csv("data/snehal.csv")
-colnames(snell_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
-
-hrs=format(as.POSIXct(snell_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%H")
-min=format(as.POSIXct(snell_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%M")
-sec=format(as.POSIXct(snell_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%S")
-
-hrs <-as.numeric(hrs)
-min <-as.numeric(min)
-sec<-as.numeric(sec)
-
 totaltime <- as.numeric(difftime(snell_data$end_time, snell_data$start_time), units="mins") + snell_data$extend_time
 
 a=matrix(c(1, 3,

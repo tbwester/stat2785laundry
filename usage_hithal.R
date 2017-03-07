@@ -1,5 +1,8 @@
-hithal_data <- read.csv("../data/hithal.csv")
+#SET THE WORKING DIRECTORY TO HERE 
+hithal_data <- read.csv("data/hithal.csv")
 colnames(hithal_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
+source("distances/hitch_dist.R")
+source("distances/get_quantile_distances.R")
 
 ## Show time of day distribution for machine starts
 hrs=format(as.POSIXct(hithal_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%H")
@@ -64,4 +67,27 @@ for(i in 1:length(totaltime)){
 }
 
 colnames(usage_ma)=c(1:78)
+
+means_hitch = apply(usage_ma, 1, mean)
+
+dist_hitch_pay = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_hitch_pay = c(dist_hitch_pay, dist_pay_ma(i, a, b))
+}
+hitch_pay_q = get_quantile_lables(dist_hitch_pay)
+
+
+dist_hitch_door = c() 
+for(i in 1:nrow(usage_ma)){
+  dist_hitch_door = c(dist_hitch_door, dist_door_ma(i, a, b))
+}
+hitch_door_q = get_quantile_lables(dist_hitch_door)
+
+
+hitch_summary = data.frame(usage = means_hitch, 
+                        pay_q = hitch_pay_q,
+                        door_q = hitch_door_q)
+write.csv(hitch_summary, "aggregate_data/hitch_summary.csv", row.names = FALSE)
+
+
 
