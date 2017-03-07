@@ -106,18 +106,19 @@ for (i in 1:length(data_train[,1])) {
     
     td <- 0
     dt <- timeofday(data_train$start_time[i])
-    if (dt > 6 && dt < 12) {
-        td <- 0
-    }
-    else if (dt > 12 && dt < 18) {
-        td <- 1
-    }
-    else if (dt > 18 && dt < 24) {
-        td <- 2
-    }
-    else {
-        td <- 3
-    }
+    td <- floor(dt)
+    #if (dt > 6 && dt < 12) {
+    #    td <- 0
+    #}
+    #else if (dt > 12 && dt < 18) {
+    #    td <- 1
+    #}
+    #else if (dt > 18 && dt < 24) {
+    #    td <- 2
+    #}
+    #else {
+    #    td <- 3
+    #}
     x3train <- append(x3train, td)
     x2train <- append(x2train, as.numeric(data_train$type[i] == "d"))
 }
@@ -134,6 +135,8 @@ ytest <- c() # Response: Next machine that gets used
 x1test <- c() # Predictor 1: % in-use of cluster
 x2test <- c() # Predictor 2: 0/1 washer/dryer
 x3test <- c() # Predictor 3: Time of day 0=morning, 1=afternoon, 2=night
+
+deltat <- c()
 for (i in 1:length(data_test[,1])) {
     nexty <- -1
     counter <- data_test$index[i] + 1 #index of next machine to start
@@ -158,7 +161,7 @@ for (i in 1:length(data_test[,1])) {
         next
     }
     ytest <- append(ytest, data[which(data$index==nexty),"number"])
-    
+    deltat <- append(deltat, as.numeric(difftime(data_test$start_time[i], data[which(data$index==nexty),"start_time"]),units="mins"))
     
     if (data_test$type[i] == "w") {
         x1test <- append(x1test, data_test$inuse_count[i]/n_wash)
@@ -169,18 +172,19 @@ for (i in 1:length(data_test[,1])) {
     
     td <- 0
     dt <- timeofday(data_test$start_time[i])
-    if (dt > 6 && dt < 12) {
-        td <- 0
-    }
-    else if (dt > 12 && dt < 18) {
-        td <- 1
-    }
-    else if (dt > 18 && dt < 24) {
-        td <- 2
-    }
-    else {
-        td <- 3
-    }
+    td <- floor(dt)
+    #if (dt > 6 && dt < 12) {
+    #    td <- 0
+    #}
+    #else if (dt > 12 && dt < 18) {
+    #    td <- 1
+    #}
+    #else if (dt > 18 && dt < 24) {
+    #    td <- 2
+    #}
+    #else {
+    #    td <- 3
+    #}
     x3test <- append(x3test, td)
     x2test <- append(x2test, as.numeric(data_test$type[i] == "d"))
 }
@@ -188,3 +192,5 @@ for (i in 1:length(data_test[,1])) {
 newdata <- data.frame(ytrain=ytest, x1train=x1test, x2train=x2test, x3train=x3test)
 
 harambe <- predict(treemodel, newdata=newdata, type="class")
+fatharambe <- predict(treemodel, newdata=newdata, type="prob")
+head(fatharambe)
