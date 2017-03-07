@@ -1,5 +1,5 @@
 a=matrix(c(1, 2, 3), ncol = 3, byrow = TRUE)
-b=matrix(c(5, 6, 7), ncol=3, byrow = TRUE)
+b=matrix(c(4, 5, 6), ncol=3, byrow = TRUE)
 
 reverse <- function(num, m, isRow){
   if(isRow==TRUE){
@@ -12,7 +12,7 @@ reverse <- function(num, m, isRow){
 same_matrix <- function(num1, num2, m){
   nu1=data.frame(which(m==num1, arr.ind = TRUE))
   nu2=data.frame(which(m==num2, arr.ind = TRUE))
-  return(abs(nu1$row-nu2$row)+abs(nu1$col-nu1$col))
+  return(abs(nu1$row-nu2$row)+abs(nu1$col-nu2$col))
 }
 
 dist_2ma <- function(num1, num2, md, mw){

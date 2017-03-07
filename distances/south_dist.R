@@ -67,7 +67,7 @@ same_matrix <- function(num1, num2, m){
 ##1, 19, 25, 30, 31,38,48,58  are closest to the door
 dist_door_ma <- function(num1, m1, m2, m3, m4, m5, m6, m7, m8){
   if(num1<=9){
-    return(same_matrix(num1, 1, m1+18))
+    return(same_matrix(num1, 1, m1)+18)
   }else if(num1>=10&&num1<=19){
     return(same_matrix(num1, 19, m2)+17)
   }else if(num1>=20&&num1<=25){
@@ -87,7 +87,7 @@ dist_door_ma <- function(num1, m1, m2, m3, m4, m5, m6, m7, m8){
 ##1, 19, 25, 30, 31,38,48,58  are closest to the pay
 dist_pay_ma <- function(num1, m1, m2, m3, m4, m5, m6, m7, m8){
   if(num1<=9){
-    return(same_matrix(num1, 1, m1+15))
+    return(same_matrix(num1, 1, m1)+15)
   }else if(num1>=10&&num1<=19){
     return(same_matrix(num1, 19, m2)+12)
   }else if(num1>=20&&num1<=25){
