@@ -157,7 +157,7 @@ data_train <- as.data.frame(fitpts[samp,])
 data_test <- as.data.frame(fitpts[-samp,])
 
 treemodel <- rpart(y ~ ., data=data_train, method="class",control=rpart.control(minsplit=50, cp=0.001))
-plot(treemodel)
+headplot(treemodel)
 text(treemodel)
 
 # print results for training set
