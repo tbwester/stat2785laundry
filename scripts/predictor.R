@@ -134,8 +134,9 @@ fitpts = cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim)
 colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
 percw = c()
+percd = c()
 for (i in 1:1000) {
-    samp <- sample(length(data_trim[,1]),500) ## get 1000 random points
+    samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
     
     data_train <- as.data.frame(fitpts[samp,])
     data_test <- as.data.frame(fitpts[-samp,])
@@ -148,7 +149,7 @@ for (i in 1:1000) {
     results_test <- predict(treemodel, newdata=data_test, type="class")
     success_test <- results_test==data_test$y
     percw <- append(percw, sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1]))
-    
+    percd <- append(percd, sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1]))
 }
 samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
 
