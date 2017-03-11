@@ -41,20 +41,52 @@ add_time_seg<-function(hrs){
 diff_part_quarter <-function(date, mo){
   if (mo==9){
     return(1)
-  }else if (mo==12){
-    return(4)
+  }else if (mo==10&&date<=7){
+    return(2)
   }else if (mo==10 && date<=14){
-    return(1)
-  }else if (mo==10 && date<=15){
-    return(2)
-  }else if(mo==11 && date<=4){
-    return(2)
-  }else if(mo==11 && date >=5 && date <=25){
     return(3)
-  }else{
+  }else if (mo==10 && date<=21){
     return(4)
+  }else if(mo==10 && date<=28){
+    return(5)
+  }else if(mo==10 || (mo==11&&date<=4)){
+    return(6)
+  }else if(mo==11 && date<=11){
+    return(7)
+  }else if(mo==11 && date<=18){
+    return(8)
+  }else if(mo==11 && date<=25){
+    return(9)
+  }else if(mo==11 || (mo==12 && date<=2)){
+    return(10)
+  }else{
+    return(11)
   }
 }
+day=data.frame(cbind(mo, date))
+
+dates=ceiling(as.numeric(difftime(burcou_data$end_time[length(burcou_data[,1])], burcou_data$start_time[1], units="days")))+1
+
+daysum=data.frame(cbind(day, as.numeric(day$mo)*31-31+as.numeric(day$date)))
+
+colnames(daysum)=c("mo","day","daynum")
+
+for(i in 1:length(totaltime)){
+  if(as.numeric(daysum$mo[i])%%2 == 0){
+    daysum$daynum[i]=daysum$daynum[i]-1
+  }
+}
+
+for(i in 1:length(totaltime)){
+  if((as.numeric(daysum$mo[i])+8) >= 11){
+    daysum$daynum[i]=daysum$daynum[i]-1
+  }
+}
+
+day_num=c()
+day_num=daysum$daynum-23
+quarter.grp = cut(day_num,
+                  breaks= c(7,14,21, 28, 35, 42, 49, 56, 63, 70))
 
 add_quarter_seg<-function(date,mo){
   quarter=c()  
@@ -63,3 +95,4 @@ add_quarter_seg<-function(date,mo){
   }
   return(quarter)
 }
+
