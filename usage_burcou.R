@@ -2,6 +2,7 @@
 burcou_data <- read.csv("data/burcou.csv")
 source("distances/bj_dist.R")
 source("distances/get_quantile_distances.R")
+source("quarter and time.R")
 colnames(burcou_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -14,6 +15,11 @@ mo=format(as.POSIXct(burcou_data$start_time, format="%Y-%m-%d %H:%M:%S"), format
 hrs <-as.numeric(hrs)
 min <-as.numeric(min)
 sec<-as.numeric(sec)
+date<-as.numeric(date)
+mo<-as.numeric(mo)
+
+hist(add_time_seg(hrs))
+hist(add_quarter_seg(date, mo))
 
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(burcou_data$end_time, burcou_data$start_time), units="mins") + burcou_data$extend_time
@@ -45,6 +51,8 @@ for(i in 1:length(totaltime)){
 
 day_num=c()
 day_num=daysum$daynum-23
+
+
 usage_ma=matrix(c(rep(0, max(ma_no)*78)), ncol=78, byrow = TRUE)
 
 j=1#ma num 1
