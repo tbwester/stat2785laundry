@@ -1,4 +1,8 @@
-maxpalwes_data <- read.csv("../data/maxpalwes.csv")
+maxpalwes_data <- read.csv("data/maxpalwes.csv")
+
+source("distances/hitch_dist.R")
+source("distances/get_quantile_distances.R")
+source("quarter and time.R")
 colnames(maxpalwes_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -11,6 +15,11 @@ mo=format(as.POSIXct(maxpalwes_data$start_time, format="%Y-%m-%d %H:%M:%S"), for
 hrs <-as.numeric(hrs)
 min <-as.numeric(min)
 sec<-as.numeric(sec)
+date<-as.numeric(date)
+mo<-as.numeric(mo)
+
+hist(add_time_seg(hrs))
+hist(add_quarter_seg(date, mo))
 
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(maxpalwes_data$end_time, maxpalwes_data$start_time), units="mins") + maxpalwes_data$extend_time

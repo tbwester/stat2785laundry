@@ -3,7 +3,7 @@ hithal_data <- read.csv("data/hithal.csv")
 colnames(hithal_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 source("distances/hitch_dist.R")
 source("distances/get_quantile_distances.R")
-
+source("quarter and time.R")
 ## Show time of day distribution for machine starts
 hrs=format(as.POSIXct(hithal_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%H")
 min=format(as.POSIXct(hithal_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%M")
@@ -14,7 +14,10 @@ mo=format(as.POSIXct(hithal_data$start_time, format="%Y-%m-%d %H:%M:%S"), format
 hrs <-as.numeric(hrs)
 min <-as.numeric(min)
 sec<-as.numeric(sec)
-
+date<-as.numeric(date)
+mo<-as.numeric(mo)
+hist(add_time_seg(hrs))
+hist(add_quarter_seg(date, mo))
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(hithal_data$end_time, hithal_data$start_time), units="mins") + hithal_data$extend_time
 totaltime_hr = totaltime/60# in hrs

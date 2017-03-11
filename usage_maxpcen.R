@@ -9,10 +9,23 @@ min=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), fo
 sec=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%S")
 date=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%d")
 mo=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%m")
+year=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%Y")
 
 hrs <-as.numeric(hrs)
 min <-as.numeric(min)
 sec<-as.numeric(sec)
+date<-as.numeric(date)
+mo<-as.numeric(mo)
+source("quarter and time.R")
+
+maxp_cen_quarter=add_quarter_seg(date, mo)
+
+hist(maxp_cen_quarter)
+
+
+maxp_cen_time=add_time_seg(hrs)
+
+hist(maxp_cen_time)
 
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(maxpalcen_data$end_time, maxpalcen_data$start_time), units="mins") + maxpalcen_data$extend_time
@@ -83,3 +96,4 @@ maxpc_summary = data.frame(usage = means_maxpc,
                         pay_q = maxpc_pay_q,
                         door_q = maxpc_door_q)
 write.csv(maxpc_summary, "aggregate_data/maxpc_summary.csv", row.names = FALSE)
+

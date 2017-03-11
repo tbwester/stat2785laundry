@@ -1,6 +1,7 @@
-snehal_data <- read.csv("../data/snehal.csv")
+snehal_data <- read.csv("data/snehal.csv")
 source("distances/snell_dist.R")
 source("distances/get_quantile_distances.R")
+source("quarter and time.R")
 colnames(snehal_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -13,7 +14,11 @@ mo=format(as.POSIXct(snehal_data$start_time, format="%Y-%m-%d %H:%M:%S"), format
 hrs <-as.numeric(hrs)
 min <-as.numeric(min)
 sec<-as.numeric(sec)
+date<-as.numeric(date)
+mo<-as.numeric(mo)
 
+hist(add_time_seg(hrs))
+hist(add_quarter_seg(date, mo))
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(snehal_data$end_time, snehal_data$start_time), units="mins") + snehal_data$extend_time
 totaltime_hr = totaltime/60# in hrs
