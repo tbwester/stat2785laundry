@@ -32,22 +32,6 @@ data$index <- 1:length(data[,1])
 data$inuse_list <- head(coin_list, -1)
 data$inuse_count <- head(coin_count, -1)
 
-## bj distance functions
-#a=matrix(c(1, 3, 5, 7, 9, 0, 0, 0, 0, 0, 0,
-#           2, 4, 6, 8, 10, 11, 12, 13, 14, 15, 16), ncol = 11, byrow = TRUE)
-#b=matrix(c(17, 18), ncol=2, byrow = TRUE)
-
-a=matrix(c(1, 3, 5, 7, 9, 
-           2, 4, 6, 8, 10 ), ncol = 5, byrow = TRUE)
-b=matrix(c(11, 12, 13, 14, 15, 16, 17, 18), ncol=8, byrow = TRUE)
-#c=matrix(c(17,18), ncol=2, byrow = TRUE)
-
-m_dist <- function(num1, num2, m){
-    nu1=data.frame(which(m==num1, arr.ind = TRUE))
-    nu2=data.frame(which(m==num2, arr.ind = TRUE))
-    return(abs(nu1$row-nu2$row)+abs(nu1$col-nu2$col))
-}
-
 timeofday <- function(date) {
     hrs=format(as.POSIXct(date, format="%Y-%m-%d %H:%M:%S"), format="%H")
     min=format(as.POSIXct(date, format="%Y-%m-%d %H:%M:%S"), format="%M")
@@ -92,20 +76,17 @@ in_matrix <- function(str, m) {
     return(count)
 }
 
-## Split data into training and test sets
 data <- data[100:length(data[,1]),] # cut the first 100 entries -- probably too low-desnity
-td <- c() # stores time deltas (not used in model)
 inds <- c() # indicator variables for each machine in-use
 for (i in 1:(length(data[,1])-1)) {
     
     data$y[i] <- 0
     for (it in (i+1):length(data[,1])) {
-        dt <- as.numeric(difftime(data$start_time[it],data$start_time[i]), units="mins")
-        td <- append(td, dt)
-        if (dt > 10) {
-            break
-        }
         if (data$type[it] == data$type[i]) {
+          dt <- as.numeric(difftime(data$start_time[it],data$start_time[i]), units="mins")
+          if (dt > 10) {
+            break
+          }
           data$y[i] <- data$number[it]
           break
         }
@@ -126,7 +107,6 @@ for (i in 1:(length(data[,1])-1)) {
     
 }
 
-
 data_trim <- data[which(data$y != 0),]
 inds_trim <- inds[which(data$y != 0),]
 
@@ -136,7 +116,6 @@ colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
 hm_list <- c()
 inset_list <- c()
-#preset_list <- c()
 for (runs in 1:1000) {
   samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
   
@@ -149,9 +128,6 @@ for (runs in 1:1000) {
   
   # print results for training set
   results <- predict(treemodel, type="class")
-  #success <- results==data_train$y
-  #sum(success[which(data_train$x2==0)]) / length(data_train[which(data_train$x2 == 0),1])
-  #sum(success[which(data_train$x2==1)]) / length(data_train[which(data_train$x2 == 1),1])
   
   # print results for test set
   results_test <- predict(treemodel, newdata=data_test, type="class")
@@ -161,9 +137,9 @@ for (runs in 1:1000) {
   preset <- c()
   results_test2 <- predict(treemodel, newdata=data_test)
   for (i in 1:length(data_test)) {
-      top3 <- order(results_test2[i,], decreasing=TRUE)[1:5]
-      preset <- rbind(preset, top3)
-      if (is.element(data_test$y[i], top3)) {
+      top <- order(results_test2[i,], decreasing=TRUE)[1:5]
+      preset <- rbind(preset, top)
+      if (is.element(data_test$y[i], top)) {
           inset <- inset + 1
       }
   }
@@ -180,11 +156,12 @@ for (runs in 1:1000) {
   washfreq <- washfreq / sum(washfreq)
   dryfreq <- dryfreq / sum(dryfreq)
   
-  hm <- mean(successes - c(dryfreq, washfreq))
+  hm <- mean(successes / c(dryfreq, washfreq))
   hm_list <- append(hm_list, hm)
 }
+
+rpart.plot(treemodel, extra=100)
 
 success_test <- results_test==data_test$y
 sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
 sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
-
