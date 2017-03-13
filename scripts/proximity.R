@@ -8,7 +8,7 @@ n_wash <- length(wash_list)
 n_dry <- length(dry_list)
 mac_list <- sort(c(wash_list, dry_list))
 
-data <- data[100:length(data[,1]),] # cut the first 100 entries -- probably too low-desnity
+#data <- data[100:length(data[,1]),] # cut the first 100 entries -- probably too low-desnity
 inds <- c() # indicator variables for each machine in-use
 for (i in 1:(length(data[,1])-1)) {
     
@@ -28,7 +28,7 @@ for (i in 1:(length(data[,1])-1)) {
     
     ## Set up indicator variables
     inds <- rbind(inds, ind_func(data$inuse_list[i]))
-    inds[i] = 1 # make sure current machine is included in list of in-use machines
+    #inds[i] = 1 # make sure current machine is included in list of in-use machines
     
     if (data$type[i] == "w") {
         data$x1[i] <- data$inuse_count[i]/n_wash

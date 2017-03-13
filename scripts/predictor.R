@@ -93,7 +93,7 @@ for (i in 1:(length(data[,1])-1)) {
     }
     
     inds <- rbind(inds, ind_func(data$inuse_list[i]))
-    inds[i] = 1 # make sure current machine is included in list of in-use machines
+    #inds[i] = 1 # make sure current machine is included in list of in-use machines
     
     if (data$type[i] == "w") {
         data$x1[i] <- data$inuse_count[i]/n_wash
