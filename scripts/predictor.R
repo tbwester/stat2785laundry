@@ -112,6 +112,7 @@ for (i in 1:(length(data[,1])-1)) {
     }
     
     inds <- rbind(inds, ind_func(data$inuse_list[i]))
+    inds[i] = 1 # make sure current machine is included in list of in-use machines
     
     if (data$type[i] == "w") {
         data$x1[i] <- data$inuse_count[i]/n_wash
@@ -134,7 +135,9 @@ fitpts = cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim)
 colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
 hm_list <- c()
-for (runs in 1:10) {
+inset_list <- c()
+#preset_list <- c()
+for (runs in 1:1000) {
   samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
   
   data_train <- as.data.frame(fitpts[samp,])
@@ -153,9 +156,20 @@ for (runs in 1:10) {
   # print results for test set
   results_test <- predict(treemodel, newdata=data_test, type="class")
   
+  # prediction set
+  inset <- 0
+  preset <- c()
+  results_test2 <- predict(treemodel, newdata=data_test)
+  for (i in 1:length(data_test)) {
+      top3 <- order(results_test2[i,], decreasing=TRUE)[1:5]
+      preset <- rbind(preset, top3)
+      if (is.element(data_test$y[i], top3)) {
+          inset <- inset + 1
+      }
+  }
+  inset_list <- append(inset_list, inset/length(data_test))
   successes <- c()
   for (i in 1:(n_wash + n_dry)) {
-    print(sum(results_test[which(data_test$y==i)]==i))
     perc <- sum(results_test[which(data_test$y==i)]==i) / sum(data_test$y==i)
     successes <- append(successes, perc)
   }
@@ -166,12 +180,11 @@ for (runs in 1:10) {
   washfreq <- washfreq / sum(washfreq)
   dryfreq <- dryfreq / sum(dryfreq)
   
-  hm <- sum(successes - c(dryfreq, washfreq))
+  hm <- mean(successes - c(dryfreq, washfreq))
   hm_list <- append(hm_list, hm)
 }
 
-
-#success_test <- results_test==data_test$y
-#sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
-#sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
+success_test <- results_test==data_test$y
+sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
+sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
 
