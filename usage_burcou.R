@@ -19,7 +19,17 @@ date<-as.numeric(date)
 mo<-as.numeric(mo)
 
 hist(add_time_seg(hrs))
-hist(add_quarter_seg(date, mo))
+
+histPercent <- function(date, mo) {
+  H <- hist(add_quarter_seg(date, mo), plot = FALSE)
+  H$density <- with(H, 100 * density* diff(breaks)[1])
+  labs <- paste(round(H$density), "%", sep="")
+  plot(H, freq = FALSE, xlim=c(1, 11),labels=labs, main="Distribution of usage density among different time of the quarter", xlab = "Week Number", col ="lightskyblue")
+}
+
+histPercent(date, mo)
+
+p=hist(add_quarter_seg(date, mo), xlim=c(1, 11), xlab = "Week Number", col ="lightskyblue", labels = T) 
 
 ## Show distribution of machine total times (excluding idle times)
 totaltime <- as.numeric(difftime(burcou_data$end_time, burcou_data$start_time), units="mins") + burcou_data$extend_time
@@ -94,3 +104,4 @@ bj_summary = data.frame(usage = means_bj,
                         pay_q = bj_pay_q,
                         door_q = bj_door_q)
 write.csv(bj_summary, "aggregate_data/bj_summary.csv", row.names = FALSE)
+

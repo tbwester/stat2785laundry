@@ -69,7 +69,8 @@ dates=ceiling(as.numeric(difftime(burcou_data$end_time[length(burcou_data[,1])],
 
 daysum=data.frame(cbind(day, as.numeric(day$mo)*31-31+as.numeric(day$date)))
 
-colnames(daysum)=c("mo","day","daynum")
+colnames(daysum)=c("mo","day","daynum
+                   ")
 
 for(i in 1:length(totaltime)){
   if(as.numeric(daysum$mo[i])%%2 == 0){
