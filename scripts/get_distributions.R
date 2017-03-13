@@ -22,6 +22,10 @@ setBeggining = function(w_times, offset = 5){
 }
 
 get_washer_times = function(data){
+  oldw <- getOption("warn")
+  options(warn = -1) 
+  options(warn = oldw)
+  
   all_times = list()
   wash_list <- unique(data$number[which(data$type=='w')])
   for(w in wash_list){
@@ -34,13 +38,17 @@ get_washer_times = function(data){
 }
 
 get_dryer_times = function(data){
+  oldw <- getOption("warn")
+  options(warn = -1) 
+  options(warn = oldw)
+  
   all_times = list()
   dry_list <- unique(data$number[which(data$type=='d')])
   for(d in dry_list){
     #title = paste("dryer", w, ",", "hitchcock")
     w_times_day = data$start_time[which(data$number == d)]
     w_times = timeofday(w_times_day)
-    all_times[[paste("dryer", w, sep = "_")]] = w_times
+    all_times[[paste("dryer", d, sep = "_")]] = w_times
   }
   return(all_times)
 }
@@ -52,21 +60,48 @@ ks_machines = function(times){
     for(j in i:n){
       ks_res = ks.test(x = times[[i]], y = times[[j]], alternative = "two.sided")
       pvals[i, j] = ks_res$p.value
+      pvals[j, i] = ks_res$p.value
     }
   }
   colnames(pvals) = names(times)
   rownames(pvals) = names(times)
+  
   return(pvals)
 }
 
-i = 1
-fileName = paste("../data/", fNames[i], ".csv", sep = "")
-data <- as.data.frame(read.csv(fileName))
-names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
-data$start_time = as.POSIXct(data$start_time) 
 
-w_times = get_washer_times(data)
-d_times = get_dryer_times(data)
+get_all_ks_tests = function(fNames){
+  ks_results = list() 
+  n_machines = 0 
+  for(i in 1:length(fNames)){
+    fileName = paste("../data/", fNames[i], ".csv", sep = "")
+    data <- as.data.frame(read.csv(fileName))
+    names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
+    data$start_time = as.POSIXct(data$start_time) 
+    
+    n_machines = n_machines + length( unique(data$number) ) 
+     
+    w_times = get_washer_times(data)
+    d_times = get_dryer_times(data)
+    
+    w_ks_p = ks_machines(w_times)
+    d_ks_p = ks_machines(d_times)
+    
+    ks_results[[paste(fNames[i], "Washers", sep = "_")]] = w_ks_p
+    ks_results[[paste(fNames[i], "Dryers", sep = "_")]] = d_ks_p
+  } 
+  print("Total number of machines: ")
+  print(n_machines)
+  return(ks_results)
+}
 
-w_ks_p = ks_machines(w_times)
-d_ks_p = ks_machines(d_times)
+get_significant_pvals = function(p_vals){
+  for(i in 1:ncol(pvals)){
+    
+  }
+}
+
+#ks_all_dorms = get_all_ks_tests(fNames)
+#total = 233
+#ks_all = ks_all_dorms
+
