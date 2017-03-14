@@ -1,9 +1,9 @@
 
 ##Use after you read the data
-date=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%d")
-mo=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%m")
-date<-as.numeric(date)
-mo<-as.numeric(mo)
+#date=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%d")
+#mo=format(as.POSIXct(maxpalcen_data$start_time, format="%Y-%m-%d %H:%M:%S"), format="%m")
+#date<-as.numeric(date)
+#mo<-as.numeric(mo)
 
 ## Divide into differnet part of time
 
@@ -63,31 +63,6 @@ diff_part_quarter <-function(date, mo){
     return(11)
   }
 }
-day=data.frame(cbind(mo, date))
-
-dates=ceiling(as.numeric(difftime(burcou_data$end_time[length(burcou_data[,1])], burcou_data$start_time[1], units="days")))+1
-
-daysum=data.frame(cbind(day, as.numeric(day$mo)*31-31+as.numeric(day$date)))
-
-colnames(daysum)=c("mo","day","daynum
-                   ")
-
-for(i in 1:length(totaltime)){
-  if(as.numeric(daysum$mo[i])%%2 == 0){
-    daysum$daynum[i]=daysum$daynum[i]-1
-  }
-}
-
-for(i in 1:length(totaltime)){
-  if((as.numeric(daysum$mo[i])+8) >= 11){
-    daysum$daynum[i]=daysum$daynum[i]-1
-  }
-}
-
-day_num=c()
-day_num=daysum$daynum-23
-quarter.grp = cut(day_num,
-                  breaks= c(7,14,21, 28, 35, 42, 49, 56, 63, 70))
 
 add_quarter_seg<-function(date,mo){
   quarter=c()  

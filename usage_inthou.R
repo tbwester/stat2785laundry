@@ -1,4 +1,4 @@
-inthou_data <- read.csv("../data/inthou.csv")
+inthou_data <- read.csv("data/inthou.csv")
 colnames(inthou_data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 ## Show time of day distribution for machine starts
@@ -16,15 +16,13 @@ sec<-as.numeric(sec)
 totaltime <- as.numeric(difftime(inthou_data$end_time, inthou_data$start_time), units="mins") + inthou_data$extend_time
 totaltime_hr = totaltime/60# in hrs
 
-totaltime_hr
-
 ma_no=inthou_data$number
 
 day=data.frame(cbind(mo, date))
 
 dates=ceiling(as.numeric(difftime(inthou_data$end_time[length(inthou_data[,1])], inthou_data$start_time[1], units="days")))+1
 
-daysum=data.frame(cbind(day, as.numeric(day$mo)*31-31+as.numeric(day$date)))
+daysum=data.frame(cbind(day, (as.numeric(day$mo))*31-31+as.numeric(day$date)))
 
 colnames(daysum)=c("mo","day","daynum")
 
@@ -46,7 +44,6 @@ usage_ma=matrix(c(rep(0, max(ma_no)*78)), ncol=78, byrow = TRUE)
 
 j=1#ma num 1
 k=1#day 1
-temp=0
 
 for(i in 1:length(totaltime)){
   if(ma_no[i]==j){

@@ -25,15 +25,13 @@ hist(add_quarter_seg(date, mo))
 totaltime <- as.numeric(difftime(maxpalwes_data$end_time, maxpalwes_data$start_time), units="mins") + maxpalwes_data$extend_time
 totaltime_hr = totaltime/60# in hrs
 
-totaltime_hr
-
 ma_no=maxpalwes_data$number
 
 day=data.frame(cbind(mo, date))
 
 dates=ceiling(as.numeric(difftime(maxpalwes_data$end_time[length(maxpalwes_data[,1])], maxpalwes_data$start_time[1], units="days")))+1
 
-daysum=data.frame(cbind(day, as.numeric(day$mo)*31-31+as.numeric(day$date)))
+daysum=data.frame(cbind(day, (as.numeric(day$mo)-8)*31-31+as.numeric(day$date)))
 
 colnames(daysum)=c("mo","day","daynum")
 
@@ -44,7 +42,7 @@ for(i in 1:length(totaltime)){
 }
 
 for(i in 1:length(totaltime)){
-  if((as.numeric(daysum$mo[i])+8) >= 11){
+  if((as.numeric(daysum$mo[i])) >= 11){
     daysum$daynum[i]=daysum$daynum[i]-1
   }
 }
@@ -55,7 +53,6 @@ usage_ma=matrix(c(rep(0, max(ma_no)*78)), ncol=78, byrow = TRUE)
 
 j=1#ma num 1
 k=1#day 1
-temp=0
 
 for(i in 1:length(totaltime)){
   if(ma_no[i]==j){
