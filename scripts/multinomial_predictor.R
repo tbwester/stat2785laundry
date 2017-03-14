@@ -1,18 +1,23 @@
 ## script to predict next machine to be used
-require(foreign)
+
+require(rpart)
 require(nnet)
-require(ggplot2)
-require(reshape2)
+library(doMC)
+registerDoMC(detectCores() / 2)
+library(parallel)
 
 ## merges coincidence files with data files
-data <- as.data.frame(read.csv("../data/burcou.csv"))
+data <- as.data.frame(read.csv("../data/burcou.csv", header=FALSE))
 names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 coin_list <- readLines("../data/coinc/burcou_coin.txt")
 
 ## total number of washers & dryers
-n_wash <- length(unique(data$number[which(data$type=='w')]))
-n_dry <- length(unique(data$number[which(data$type=='d')]))
+wash_list <- unique(data$number[which(data$type=='w')])
+dry_list <- unique(data$number[which(data$type=='d')])
+n_wash <- length(wash_list)
+n_dry <- length(dry_list)
+mac_list <- sort(c(wash_list, dry_list))
 
 coin_count <- c()
 for (i in 1:length(coin_list)) {
@@ -28,24 +33,8 @@ data <- data[order(data$start_time),]
 data$index <- 1:length(data[,1])
 
 ## merge
-data$inuse_list <- head(coin_list, -1)
-data$inuse_count <- head(coin_count, -1)
-
-## bj distance functions
-#a=matrix(c(1, 3, 5, 7, 9, 0, 0, 0, 0, 0, 0,
-#           2, 4, 6, 8, 10, 11, 12, 13, 14, 15, 16), ncol = 11, byrow = TRUE)
-#b=matrix(c(17, 18), ncol=2, byrow = TRUE)
-
-a=matrix(c(1, 3, 5, 7, 9, 
-           2, 4, 6, 8, 10 ), ncol = 5, byrow = TRUE)
-b=matrix(c(11, 12, 13, 14, 15, 16, 17, 18), ncol=8, byrow = TRUE)
-#c=matrix(c(17,18), ncol=2, byrow = TRUE)
-
-m_dist <- function(num1, num2, m){
-  nu1=data.frame(which(m==num1, arr.ind = TRUE))
-  nu2=data.frame(which(m==num2, arr.ind = TRUE))
-  return(abs(nu1$row-nu2$row)+abs(nu1$col-nu2$col))
-}
+data$inuse_list <- coin_list
+data$inuse_count <- coin_count
 
 timeofday <- function(date) {
   hrs=format(as.POSIXct(date, format="%Y-%m-%d %H:%M:%S"), format="%H")
@@ -57,6 +46,24 @@ timeofday <- function(date) {
   sec<-as.numeric(sec)
   
   return(hrs + (min / 60) + (sec / 3600))
+}
+
+ind_func <- function(string) {
+  if (string == "") {
+    return(numeric(length(mac_list)))
+  }
+  thelist <- strsplit(string, ",")[[1]]
+  thelist <- as.numeric(sort(unique(thelist)))
+  outvec <- c()
+  for (i in 1:length(mac_list)) {
+    if (is.element(mac_list[i], thelist)) {
+      outvec <- append(outvec,1)
+    }
+    else {
+      outvec <- append(outvec,0)
+    }
+  }
+  return(outvec)
 }
 
 in_matrix <- function(str, m) {
@@ -73,127 +80,85 @@ in_matrix <- function(str, m) {
   return(count)
 }
 
-## Split data into training and test sets
 data <- data[100:length(data[,1]),] # cut the first 100 entries -- probably too low-desnity
-samp <- sample(length(data[,1]),1000) ## get 1000 random points
-data_train <- data[samp,]
-data_test <- data[-samp,]
-
-ytrain <- c() # Response: Next machine that gets used
-x1train <- c() # Predictor 1: % in-use of cluster
-x2train <- c() # Predictor 2: 0/1 washer/dryer
-x3train <- c() # Predictor 3: Time of day 0=morning, 1=afternoon, 2=night
-for (i in 1:length(data_train[,1])) {
-  nexty <- -1
-  counter <- data_train$index[i] + 1 #index of next machine to start
-  while (nexty == -1) {
-    entry <- data[which(data$index==counter),]
-    if (entry$type != data_train$type[i]) {
-      counter = counter + 1
-      next
-    }
-    if (is.element(entry$number, a) && !is.element(data_train$number[i], a) ) {
-      counter = counter + 1
-      next
-    }
-    nexty = entry$index
-  }
-  ytrain <- append(ytrain, data[which(data$index==nexty),"number"])
+inds <- c() # indicator variables for each machine in-use
+for (i in 1:(length(data[,1])-1)) {
   
-  
-  if (data_train$type[i] == "w") {
-    x1train <- append(x1train, data_train$inuse_count[i]/n_wash)
-  }
-  else {
-    x1train <- append(x1train, data_train$inuse_count[i]/n_dry)
-  }
-  
-  td <- 0
-  dt <- timeofday(data_train$start_time[i])
-  if (dt > 6 && dt < 12) {
-    td <- 0
-  }
-  else if (dt > 12 && dt < 18) {
-    td <- 1
-  }
-  else if (dt > 18 && dt < 24) {
-    td <- 2
-  }
-  else {
-    td <- 3
-  }
-  x3train <- append(x3train, td)
-  x2train <- append(x2train, as.numeric(data_train$type[i] == "d"))
-}
-
-treemodel <- rpart(ytrain ~ x1train + x2train + x3train, method="class",control=rpart.control(minsplit=50, cp=0.001))
-
-results <- predict(treemodel, type="class")
-
-ytest <- c() # Response: Next machine that gets used
-x1test <- c() # Predictor 1: % in-use of cluster
-x2test <- c() # Predictor 2: 0/1 washer/dryer
-x3test <- c() # Predictor 3: Time of day 0=morning, 1=afternoon, 2=night
-for (i in 1:length(data_test[,1])) {
-  nexty <- -1
-  counter <- data_test$index[i] + 1 #index of next machine to start
-  invalid <- FALSE
-  while (nexty == -1) {
-    entry <- data[which(data$index==counter),]
-    if (dim(entry)[1] == 0) {
-      invalid <- TRUE
+  data$y[i] <- 0
+  for (it in (i+1):length(data[,1])) {
+    if (data$type[it] == data$type[i]) {
+      dt <- as.numeric(difftime(data$start_time[it],data$start_time[i]), units="mins")
+      if (dt > 10) {
+        break
+      }
+      data$y[i] <- data$number[it]
       break
     }
-    if (entry$type != data_test$type[i]) {
-      counter = counter + 1
-      next
-    }
-    if (is.element(entry$number, a) && !is.element(data_test$number[i], a) ) {
-      counter = counter + 1
-      next
-    }
-    nexty = entry$index
   }
-  if (invalid) {
-    next
-  }
-  ytest <- append(ytest, data[which(data$index==nexty),"number"])
   
+  inds <- rbind(inds, ind_func(data$inuse_list[i]))
+  #inds[i] = 1 # make sure current machine is included in list of in-use machines
   
-  if (data_test$type[i] == "w") {
-    x1test <- append(x1test, data_test$inuse_count[i]/n_wash)
+  if (data$type[i] == "w") {
+    data$x1[i] <- data$inuse_count[i]/n_wash
   }
   else {
-    x1test <- append(x1test, data_test$inuse_count[i]/n_dry)
+    data$x1[i] <- data$inuse_count[i]/n_dry
   }
   
-  td <- 0
-  dt <- timeofday(data_test$start_time[i])
-  if (dt > 6 && dt < 12) {
-    td <- 0
-  }
-  else if (dt > 12 && dt < 18) {
-    td <- 1
-  }
-  else if (dt > 18 && dt < 24) {
-    td <- 2
-  }
-  else {
-    td <- 3
-  }
-  x3test <- append(x3test, td)
-  x2test <- append(x2test, as.numeric(data_test$type[i] == "d"))
+  data$x2[i] <- as.numeric(data$type[i] == "d")
+  data$x3[i] <- floor(timeofday(data$start_time[i]))
+  
 }
 
-newdata <- data.frame(ytrain=ytest, x1train=x1test, x2train=x2test, x3train=x3test)
+data_trim <- data[which(data$y != 0),]
+inds_trim <- inds[which(data$y != 0),]
 
-harambe <- predict(treemodel, newdata=newdata, type="class")
+# create data frame with just Y and Xs
+fitpts = cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim)
+colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
-test <- multinom(as.factor(ytrain) ~ x1train + x2train + x3train)
-z <- summary(test)$coefficients/summary(test)$standard.errors
-z
-p <- (1 - pnorm(abs(z), 0, 1)) * 2
-p
+hm_list <- c()
+hm_list = foreach(i = 1:1000, combine = rbind) %dopar% {
+  samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
+  
+  data_train <- as.data.frame(fitpts[samp,])
+  data_test <- as.data.frame(fitpts[-samp,])
+  
+  treemodel <- rpart(y ~ ., data=data_train, method="class",control=rpart.control(minsplit=50, cp=0.001))
+  #plot(treemodel)
+  #text(treemodel)
+  
+  multimodel = multinom(as.factor(y) ~ ., data = data_train)
+  
+  # print results for training set
+  results <- predict(treemodel, type="class")
+  res_mlogit = predict(multimodel)
+  
+  # print results for test set
+  results_test <- predict(treemodel, newdata=data_test, type="class")
+  res_test_mlogit = predict(multimodel, newdata=data_test)
+  #mean(res_test_mlogit == data_test$y)
+  
+  successes <- c()
+  for (i in 1:(n_wash + n_dry)) {
+    perc <- sum(results_test[which(data_test$y==i)]==i) / sum(data_test$y==i)
+    successes <- append(successes, perc)
+  }
+  
+  washfreq <- table(data_test$y[which(data_test$x2==0)])
+  dryfreq <- table(data_test$y[which(data_test$x2==1)])
+  
+  washfreq <- washfreq / sum(washfreq)
+  dryfreq <- dryfreq / sum(dryfreq)
+  
+  hm <- mean(successes / c(dryfreq, washfreq))
+  return(hm)
+}
+hm_list_v = unlist(hm_list)
+hist(hm_list_v, main = "Multinomial Logit", xlab = "Success % / Random %")
+#rpart.plot(treemodel, extra=100)
 
-pred_multi = predict(test, newdata)
-mean(pred_multi == newdata$ytrain)
+success_test <- results_test==data_test$y
+sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
+sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
