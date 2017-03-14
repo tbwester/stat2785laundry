@@ -118,6 +118,36 @@ inds_trim <- inds[which(data$y != 0),]
 fitpts = cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim)
 colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
+
+#INFERENCE
+
+##Given Matrix of p values of multinom coefficeints, finds which ones are significant with BH 
+##correction 
+get_signals_multinom = function(pvals){
+  p_bh = p.adjust(pvals, method = "BH")
+  p_bh_m = matrix(p_bh, ncol = ncol(pvals) )
+  colnames(p_bh_m) = colnames(pvals)  
+  rownames(p_bh_m) = rownames(pvals)
+  return(p_bh_m)
+}
+
+df = as.data.frame(fitpts)
+
+multi_fit = multinom(as.factor(y) ~ ., data = df)
+s_mfit = summary(multi_fit)
+save(s_mfit, file = "BJ_multilogit.Rdata")
+z = s_mfit$coefficients / s_mfit$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+
+p_bh = get_signals_multinom(p)
+p_bh < 0.05
+
+##correlated p values? 
+mean( cor(p) > 0.8)
+
+
+
+#PREDICTION PART 
 hm_list <- c()
 hm_list = foreach(i = 1:1000, combine = rbind) %dopar% {
   samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
@@ -125,24 +155,24 @@ hm_list = foreach(i = 1:1000, combine = rbind) %dopar% {
   data_train <- as.data.frame(fitpts[samp,])
   data_test <- as.data.frame(fitpts[-samp,])
   
-  treemodel <- rpart(y ~ ., data=data_train, method="class",control=rpart.control(minsplit=50, cp=0.001))
+  #treemodel <- rpart(y ~ ., data=data_train, method="class",control=rpart.control(minsplit=50, cp=0.001))
   #plot(treemodel)
   #text(treemodel)
   
   multimodel = multinom(as.factor(y) ~ ., data = data_train)
   
   # print results for training set
-  results <- predict(treemodel, type="class")
+  #results <- predict(treemodel, type="class")
   res_mlogit = predict(multimodel)
   
   # print results for test set
-  results_test <- predict(treemodel, newdata=data_test, type="class")
+  #results_test <- predict(treemodel, newdata=data_test, type="class")
   res_test_mlogit = predict(multimodel, newdata=data_test)
   #mean(res_test_mlogit == data_test$y)
   
   successes <- c()
   for (i in 1:(n_wash + n_dry)) {
-    perc <- sum(results_test[which(data_test$y==i)]==i) / sum(data_test$y==i)
+    perc <- sum(res_test_mlogit[which(data_test$y==i)]==i) / sum(data_test$y==i)
     successes <- append(successes, perc)
   }
   
@@ -157,8 +187,6 @@ hm_list = foreach(i = 1:1000, combine = rbind) %dopar% {
 }
 hm_list_v = unlist(hm_list)
 hist(hm_list_v, main = "Multinomial Logit", xlab = "Success % / Random %")
+write.csv(as.data.frame(hm_list_v), "multinomial_hm.csv")
 #rpart.plot(treemodel, extra=100)
 
-success_test <- results_test==data_test$y
-sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
-sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
