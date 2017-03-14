@@ -22,6 +22,14 @@ for (i in 1:(length(data[,1])-1)) {
             }
             ## Once a valid machine in found, use it and break
             data$y[i] <- data$number[it]
+            
+            ## Randomize the result (testing only)
+            #if (data$type[i] == 'w') {
+            #  data$y[i] <- sample(wash_list,1,prob=washfreq)
+            #}
+            #else {
+            #  data$y[i] <- sample(dry_list,1,prob=dryfreq)
+            #}
             break
         }
     }
