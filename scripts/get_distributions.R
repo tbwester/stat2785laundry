@@ -92,7 +92,7 @@ get_washer_coin = function(data, coin_list){
 }
 
 #Returns the indices of times where i does not have j running 
-get_free_choice = function(i, j, times, coins){
+get_free_choice = function(i, j, coins){
   coin_i = coins[[i]]
   indices = c() 
   for(k in 1:length(coin_i)){
@@ -115,8 +115,8 @@ ks_machines = function(times, coins){
   pvals = matrix(rep(0, n^2), ncol = n)
   for(i in 1:n){
     for(j in i:n){
-      x_ind = get_free_choice(i, j, times, coins)
-      y_ind = get_free_choice(j, i, times, coins)
+      x_ind = get_free_choice(i, j, coins)
+      y_ind = get_free_choice(j, i, coins)
       ks_res = ks.test(x = times[[i]][x_ind], y = times[[j]][y_ind], 
                        alternative = "two.sided")
       pvals[i, j] = ks_res$p.value
@@ -191,10 +191,10 @@ get_significant_pvals = function(ks_results, n_cmp, fNames, alpha = 0.05){
   return(signals)
 }
 
-ks_all_dorms = get_all_ks_tests(fNames)
-n_cmp = get_n_test(ks_all_dorms)
-signals = get_significant_pvals(ks_all_dorms, n_cmp, fNames, alpha = 0.05)
-signals
+#ks_all_dorms = get_all_ks_tests(fNames)
+#n_cmp = get_n_test(ks_all_dorms)
+#signals = get_significant_pvals(ks_all_dorms, n_cmp, fNames, alpha = 0.05)
+#signals
 #Nothing is significant... LMAO 
 #total = 233
 #ks_all = ks_all_dorms
