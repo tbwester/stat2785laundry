@@ -29,7 +29,7 @@ def coincidence(fname):
                          names = ['start_time','end_time','extend_time',
                          'idle_time','num','kind','dorm'], delimiter=",")
 
-    #Sort data by end time
+    #Sort data by start time
     data = np.sort( data, order=['start_time'] )
 
     longname = data[0]['dorm']
