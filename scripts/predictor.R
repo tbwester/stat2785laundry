@@ -3,7 +3,7 @@
 require(rpart)
 
 ## merges coincidence files with data files
-data <- as.data.frame(read.csv("../data/burcou.csv"))
+data <- as.data.frame(read.csv("../data/burcou.csv", header=FALSE))
 names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
 coin_list <- readLines("../data/coinc/burcou_coin.txt")
@@ -29,8 +29,8 @@ data <- data[order(data$start_time),]
 data$index <- 1:length(data[,1])
 
 ## merge
-data$inuse_list <- head(coin_list, -1)
-data$inuse_count <- head(coin_count, -1)
+data$inuse_list <- coin_list
+data$inuse_count <- coin_count
 
 timeofday <- function(date) {
     hrs=format(as.POSIXct(date, format="%Y-%m-%d %H:%M:%S"), format="%H")

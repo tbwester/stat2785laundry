@@ -6,7 +6,7 @@ setupdata <- function(name) {
     ## Get paths to data and coincidence files
     filename <- paste("../data/", name, ".csv", sep = "")
     coinfilename <- paste("../data/coinc/", name, "_coin.txt", sep = "")
-    data <- as.data.frame(read.csv(filename))
+    data <- as.data.frame(read.csv(filename, header=FALSE))
     names(data) <- c("start_time", "end_time", "extend_time", "idle_time", "number", "type", "dorm")
 
     coin_list <- readLines(coinfilename)
@@ -32,8 +32,8 @@ setupdata <- function(name) {
     data$index <- 1:length(data[,1])
     
     ## merge
-    data$inuse_list <- head(coin_list, -1)
-    data$inuse_count <- head(coin_count, -1)
+    data$inuse_list <- coin_list
+    data$inuse_count <- coin_count
     
     return(data)
 }
