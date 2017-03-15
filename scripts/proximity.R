@@ -53,57 +53,35 @@ data_trim <- data[which(data$y != 0),]
 inds_trim <- inds[which(data$y != 0),]
 
 # create data frame with just Y and Xs
-fitpts = cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim)
+fitpts = as.data.frame(cbind(data_trim$y, data_trim$x1, data_trim$x2, data_trim$x3, inds_trim))
 colnames(fitpts) <- c("y", "x1", "x2", "x3", as.character(1:length(mac_list)))
 
-hm_list <- c()
-inset_list <- c()
-for (runs in 1:1000) {
-  samp <- sample(length(data_trim[,1]),1000) ## get 1000 random points
-  
-  data_train <- as.data.frame(fitpts[samp,])
-  data_test <- as.data.frame(fitpts[-samp,])
-  
-  treemodel <- rpart(y ~ ., data=data_train, method="class",control=rpart.control(minsplit=50, cp=0.001))
-  #plot(treemodel)
-  #text(treemodel)
-  
-  # print results for training set
-  results <- predict(treemodel, type="class")
-  
-  # print results for test set
-  results_test <- predict(treemodel, newdata=data_test, type="class")
-  
-  # prediction set
-  inset <- 0
-  preset <- c()
-  results_test2 <- predict(treemodel, newdata=data_test)
-  for (i in 1:length(data_test)) {
-    top <- order(results_test2[i,], decreasing=TRUE)[1:5]
-    preset <- rbind(preset, top)
-    if (is.element(data_test$y[i], top)) {
-      inset <- inset + 1
-    }
-  }
-  inset_list <- append(inset_list, inset/length(data_test))
-  successes <- c()
-  for (i in 1:(n_wash + n_dry)) {
-    perc <- sum(results_test[which(data_test$y==i)]==i) / sum(data_test$y==i)
-    successes <- append(successes, perc)
-  }
-  
-  washfreq <- table(data_test$y[which(data_test$x2==0)])
-  dryfreq <- table(data_test$y[which(data_test$x2==1)])
-  
-  washfreq <- washfreq / sum(washfreq)
-  dryfreq <- dryfreq / sum(dryfreq)
-  
-  hm <- mean(successes / c(dryfreq, washfreq))
-  hm_list <- append(hm_list, hm)
-}
+## Two-way table: P(i|k in use, i,j available), P(j|k in use, i,j available), etc
+i <- 14
+j <- 13
+k <- 12
 
-rpart.plot(treemodel, extra=100)
+## k in use     k not in use
+#i  a               b
+#j  c               d
 
-success_test <- results_test==data_test$y
-sum(success_test[which(data_test$x2==0)]) / length(data_test[which(data_test$x2 == 0),1])
-sum(success_test[which(data_test$x2==1)]) / length(data_test[which(data_test$x2 == 1),1])
+kfree <- length(fitpts[which(fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 0),1])
+kbusy <- length(fitpts[which(fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 1),1])
+
+## P(i & i,j free & k free)
+a <- length(fitpts[which(fitpts$y==i & fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 0),1])
+a <- a / kfree
+
+## P(i & i,j free & k in-use)
+b <- length(fitpts[which(fitpts$y==i & fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 1),1])
+b <- b / kbusy
+
+## P(j & i,j free & k free)
+c <- length(fitpts[which(fitpts$y==j & fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 0),1])
+c <- c / kfree
+
+## P(j & i,j free & k in-use)
+d <- length(fitpts[which(fitpts$y==j & fitpts[,i+4] == 0 & fitpts[,j+4] == 0 & fitpts[,k+4] == 1),1])
+d <- d / kbusy
+
+mat <- matrix(c(a,b,c,d), ncol=2)
