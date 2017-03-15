@@ -40,7 +40,6 @@ for(i in 1:1000){
   if(is.na( var(pay_coeff)) ){
     print("FUCK.")
     print(pay_coeff)
-    break
   } 
   ref=aggregate_data$num
   aggregate_data$num=sample(1:length(ref))
