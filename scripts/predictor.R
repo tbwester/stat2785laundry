@@ -88,13 +88,20 @@ for (i in 1:(length(data[,1])-1)) {
             break
           }
           data$y[i] <- data$number[it]
+          ## Randomize the result (testing only)
+          if (data$type[i] == 'w') {
+            data$y[i] <- sample(wash_list,1,prob=washfreq)
+          }
+          else {
+            data$y[i] <- sample(dry_list,1,prob=dryfreq)
+          }
           break
         }
     }
     
     inds <- rbind(inds, ind_func(data$inuse_list[i]))
-    #inds[i] = 1 # make sure current machine is included in list of in-use machines
-    
+    inds[i, data$number[i]] = 1 # make sure current machine is included in list of in-use machines
+
     if (data$type[i] == "w") {
         data$x1[i] <- data$inuse_count[i]/n_wash
     }
